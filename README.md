@@ -3,4 +3,4 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/20491e962fb3ef50820b/maintainability)](https://codeclimate.com/github/Victoria-Borovik/frontend-project-11/maintainability)
 [![rss-check](https://github.com/Victoria-Borovik/frontend-project-11/actions/workflows/rss-check.yml/badge.svg)](https://github.com/Victoria-Borovik/frontend-project-11/actions/workflows/rss-check.yml)
 
-[RSS агрегатор](frontend-project-11-gamma-seven.vercel.app)
+[RSS агрегатор](https://frontend-project-11-gamma-seven.vercel.app/)
