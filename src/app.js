@@ -1,36 +1,56 @@
 import * as yup from 'yup';
+import i18n from 'i18next';
 import onChange from 'on-change';
-import axios from 'axios';
-import render from './view.js';
+import render from './view';
+import resources from './locales/index';
 
 const validateUrl = (url, urls) => {
-  const schema = yup.string().required()
-    .url('Ссылка должна быть валидным URL')
-    .notOneOf(urls, 'RSS уже сущесвует');
+  yup.setLocale({
+    mixed: {
+      notOneOf: () => ('errors.rssDoubling'),
+    },
+    string: {
+      url: () => ('errors.notValidUrl'),
+    },
+  });
+
+  const schema = yup.string()
+    .url()
+    .notOneOf(urls);
   return schema.validate(url);
 };
 
 const app = () => {
+  const i18nInstance = i18n.createInstance();
+  i18nInstance.init({
+    lng: 'ru',
+    debug: false,
+    resources,
+  });
+
   const state = {
     urls: [],
     error: '',
+    feeds: [],
+    posts: [],
   };
 
-  const form = document.querySelector('form');
-  const feedback = document.querySelector('.feedback');
-  const input = form.querySelector('input#url-input');
+  const elements = {
+    form: document.querySelector('form'),
+    feedback: document.querySelector('.feedback'),
+    input: document.querySelector('input'),
+    feeds: document.querySelector('.feeds'),
+    posts: document.querySelector('.posts'),
+  };
 
-  const wachedState = onChange(state, render(form, input, feedback));
+  const wachedState = onChange(state, render(elements, i18nInstance));
 
-  form.addEventListener('submit', (e) => {
+  elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const url = formData.get('url');
     validateUrl(url, wachedState.urls)
       .then(() => {
-        axios.get(url)
-          .then(console.log)
-          .catch(() => console.log('err'))
         wachedState.error = '';
         wachedState.urls.push(url);
       })
