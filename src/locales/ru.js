@@ -2,6 +2,7 @@ export default {
   translation: {
     feeds: 'Фиды',
     posts: 'Посты',
+    button: 'Просмотр',
     validationMessage: {
       success: 'RSS успешно загружен',
     },
@@ -9,6 +10,8 @@ export default {
       notValidUrl: 'Ссылка должна быть валидным URL',
       notValidRss: 'Ресурс не содержит валидный RSS',
       rssDoubling: 'RSS уже сущесвует',
+      networkErr: 'Ошибка сети',
+      unknownErr: 'Если бы мы знали, что это такое, мы не знаем что это такое',
     },
   },
 };
