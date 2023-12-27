@@ -2,7 +2,7 @@ import * as yup from 'yup';
 import i18n from 'i18next';
 import axios from 'axios';
 import { uniqueId } from 'lodash';
-import watch from './view';
+import view from './view';
 import resources from './locales/index';
 import parse from './parser';
 
@@ -37,6 +37,12 @@ const app = () => {
     error: '',
     feeds: [],
     posts: [],
+    uiState: {
+      readPostsId: [],
+      modal: {
+        modalId: '',
+      },
+    },
   };
 
   const elements = {
@@ -45,42 +51,77 @@ const app = () => {
     inputEl: document.querySelector('input'),
     feedsEl: document.querySelector('.feeds'),
     postsEl: document.querySelector('.posts'),
+    modal: {
+      titleEl: document.querySelector('.modal-title'),
+      descEl: document.querySelector('.modal-body'),
+      linkEl: document.querySelector('.modal-footer a'),
+      closeEl: document.querySelector('.modal-footer button[type="button"]'),
+    },
   };
 
-  const wachedState = watch(state, elements, i18nInstance);
+  const watchedState = view(state, elements, i18nInstance);
 
   const loadUrl = (url) => (axios.get(url)
     .then((response) => {
       const { feed, posts } = parse(response.data.contents);
       feed.id = uniqueId();
-      wachedState.feeds = [...wachedState.feeds, feed];
-      const postsWithId = posts.map((post) => ({ ...post, id: feed.id }));
-      wachedState.posts = [...wachedState.posts, ...postsWithId];
-      wachedState.error = '';
-      wachedState.urls.push(url);
+      feed.url = url;
+      watchedState.feeds = [...watchedState.feeds, feed];
+      const postsWithId = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
+      watchedState.posts = [...watchedState.posts, ...postsWithId];
+      watchedState.error = '';
+      watchedState.urls.push(url);
     }).catch((error) => {
       if (error.isParsingError) {
-        wachedState.error = 'errors.notValidRss';
+        watchedState.error = 'errors.notValidRss';
       } else if (error.isAxiosError) {
-        wachedState.error = 'errors.networkErr';
+        watchedState.error = 'errors.networkErr';
       } else {
-        wachedState.error = 'errors.unknownErr';
+        watchedState.error = 'errors.unknownErr';
       }
     })
   );
+
+  const updatePosts = () => {
+    watchedState.feeds.forEach(({ url, id }) => {
+      axios.get(url).then((response) => {
+        const { posts } = parse(response.data.contents);
+        const prevPostsLinks = watchedState.posts
+          .filter((post) => post.feedId === id)
+          .map((post) => post.link);
+        const newPosts = posts
+          .filter((post) => !prevPostsLinks.includes(post.link))
+          .map((post) => ({ ...post, feedId: id, id: uniqueId() }));
+        if (newPosts.length) {
+          watchedState.posts = [...watchedState.posts, ...newPosts];
+        }
+      }).catch((err) => {
+        throw new Error(`Update posts error. ${err}`);
+      });
+    });
+    setTimeout(updatePosts, 5000);
+  };
 
   elements.formEl.addEventListener('submit', (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const url = formData.get('url');
-    validateUrl(url, wachedState.urls)
+    validateUrl(url, watchedState.urls)
       .then(() => {
         const normalizedUrl = normalizeUrl(url);
         loadUrl(normalizedUrl);
       })
       .catch((error) => {
-        wachedState.error = error.errors;
+        watchedState.error = error.errors;
       });
+  });
+  updatePosts();
+
+  elements.postsEl.addEventListener('click', (e) => {
+    const { id } = e.target.dataset;
+    if (!id) return;
+    watchedState.uiState.readPostsId = [...watchedState.uiState.readPostsId, id];
+    watchedState.uiState.modal.modalId = id;
   });
 };
 

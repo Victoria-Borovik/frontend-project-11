@@ -3,6 +3,10 @@ export default {
     feeds: 'Фиды',
     posts: 'Посты',
     button: 'Просмотр',
+    modal: {
+      read: 'Читать полностью',
+      close: 'Закрыть',
+    },
     validationMessage: {
       success: 'RSS успешно загружен',
     },

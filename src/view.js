@@ -1,5 +1,25 @@
 import onChange from 'on-change';
-import { differenceBy } from 'lodash';
+import { differenceBy, difference } from 'lodash';
+
+const fillInModal = (state, currId, modal, i18n) => {
+  const {
+    titleEl, descEl,
+    linkEl, closeEl,
+  } = modal;
+  const [{ title, description, link }] = state.posts.filter((post) => post.id === currId);
+  titleEl.textContent = title;
+  descEl.textContent = description;
+  linkEl.setAttribute('href', link);
+  linkEl.textContent = i18n.t('modal.read');
+  closeEl.textContent = i18n.t('modal.close');
+};
+
+const checkReadPosts = (prevIds, currIds) => {
+  const newId = difference(currIds, prevIds);
+  const readItem = document.querySelector(`a[data-id="${newId}"]`);
+  readItem.classList.remove('fw-bold');
+  readItem.classList.add('fw-normal', 'link-secondary');
+};
 
 const createDataList = (container, containerHeader) => {
   const card = document.createElement('div');
@@ -21,7 +41,7 @@ const createDataList = (container, containerHeader) => {
 
 const createPostsList = (posts, btnName) => posts.map((post) => {
   const {
-    title, link, id,
+    title, link, feedId, id,
   } = post;
 
   const postItem = document.createElement('li');
@@ -39,17 +59,18 @@ const createPostsList = (posts, btnName) => posts.map((post) => {
   postHeader.setAttribute('href', link);
   postHeader.setAttribute('target', '_blank');
   postHeader.setAttribute('rel', 'noopener noreferrer');
+  postHeader.dataset.feedId = feedId;
   postHeader.dataset.id = id;
   postHeader.textContent = title;
 
   const postSubmit = document.createElement('button');
   postSubmit.classList.add('btn', 'btn-outline-primary', 'btn-sm');
   postSubmit.setAttribute('type', 'button');
+  postSubmit.dataset.feedId = feedId;
   postSubmit.dataset.id = id;
   postSubmit.dataset.bsToggle = 'modal';
   postSubmit.dataset.bsTarget = '#modal';
   postSubmit.textContent = btnName;
-
   postItem.append(postHeader, postSubmit);
   return postItem;
 });
@@ -99,7 +120,7 @@ const renderFeeds = (currValue, prevValue, container, containerHeader) => {
 export default (state, elements, i18n) => onChange(state, (path, currValue, prevValue) => {
   const {
     formEl, feedbackEl, inputEl,
-    feedsEl, postsEl,
+    feedsEl, postsEl, modal,
   } = elements;
 
   feedbackEl.textContent = '';
@@ -123,6 +144,12 @@ export default (state, elements, i18n) => onChange(state, (path, currValue, prev
       break;
     case 'posts':
       renderPosts(currValue, prevValue, postsEl, i18n.t(path), i18n.t('button'));
+      break;
+    case 'uiState.readPostsId':
+      checkReadPosts(prevValue, currValue);
+      break;
+    case 'uiState.modal.modalId':
+      fillInModal(state, currValue, modal, i18n);
       break;
     default:
       throw new Error('Unknown change');
