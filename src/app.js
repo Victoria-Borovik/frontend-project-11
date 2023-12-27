@@ -106,10 +106,12 @@ const app = () => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const url = formData.get('url');
+    console.log(url);
     validateUrl(url, watchedState.urls)
       .then(() => {
         const normalizedUrl = normalizeUrl(url);
         loadUrl(normalizedUrl);
+        watchedState.urls.push(url);
       })
       .catch((error) => {
         watchedState.error = error.errors;
