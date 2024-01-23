@@ -6,7 +6,12 @@ import view from './view';
 import resources from './locales/index';
 import parse from './parser';
 
-const normalizeUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
+const addProxy = (url) => {
+  const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
+  proxyUrl.searchParams.append('disableCache', 'true');
+  proxyUrl.searchParams.append('url', url);
+  return proxyUrl;
+};
 
 const validateUrl = (url, urls) => {
   yup.setLocale({
@@ -109,8 +114,8 @@ const app = () => {
     console.log(url);
     validateUrl(url, watchedState.urls)
       .then(() => {
-        const normalizedUrl = normalizeUrl(url);
-        loadUrl(normalizedUrl);
+        const proxyUrl = addProxy(url);
+        loadUrl(proxyUrl);
         watchedState.urls.push(url);
       })
       .catch((error) => {
