@@ -30,13 +30,6 @@ const validateUrl = (url, urls) => {
 };
 
 const app = () => {
-  const i18nInstance = i18n.createInstance();
-  i18nInstance.init({
-    lng: 'ru',
-    debug: false,
-    resources,
-  });
-
   const state = {
     urls: [],
     error: '',
@@ -64,71 +57,78 @@ const app = () => {
     },
   };
 
-  const watchedState = view(state, elements, i18nInstance);
+  const i18nInstance = i18n.createInstance();
+  i18nInstance.init({
+    lng: 'ru',
+    debug: false,
+    resources,
+  }).then(() => {
+    const watchedState = view(state, elements, i18nInstance);
 
-  const loadUrl = (url) => (axios.get(url)
-    .then((response) => {
-      const { feed, posts } = parse(response.data.contents);
-      feed.id = uniqueId();
-      feed.url = url;
-      watchedState.feeds = [...watchedState.feeds, feed];
-      const postsWithId = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
-      watchedState.posts = [...watchedState.posts, ...postsWithId];
-      watchedState.error = '';
-      watchedState.urls.push(url);
-    }).catch((error) => {
-      if (error.isParsingError) {
-        watchedState.error = 'errors.notValidRss';
-      } else if (error.isAxiosError) {
-        watchedState.error = 'errors.networkErr';
-      } else {
-        watchedState.error = 'errors.unknownErr';
-      }
-    })
-  );
-
-  const updatePosts = () => {
-    watchedState.feeds.forEach(({ url, id }) => {
-      axios.get(url).then((response) => {
-        const { posts } = parse(response.data.contents);
-        const prevPostsLinks = watchedState.posts
-          .filter((post) => post.feedId === id)
-          .map((post) => post.link);
-        const newPosts = posts
-          .filter((post) => !prevPostsLinks.includes(post.link))
-          .map((post) => ({ ...post, feedId: id, id: uniqueId() }));
-        if (newPosts.length) {
-          watchedState.posts = [...watchedState.posts, ...newPosts];
-        }
-      }).catch((err) => {
-        throw new Error(`Update posts error. ${err}`);
-      });
-    });
-    setTimeout(updatePosts, 5000);
-  };
-
-  elements.formEl.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const url = formData.get('url');
-    console.log(url);
-    validateUrl(url, watchedState.urls)
-      .then(() => {
-        const proxyUrl = addProxy(url);
-        loadUrl(proxyUrl);
+    const loadUrl = (url) => (axios.get(url)
+      .then((response) => {
+        const { feed, posts } = parse(response.data.contents);
+        feed.id = uniqueId();
+        feed.url = url;
+        watchedState.feeds = [...watchedState.feeds, feed];
+        const postsWithId = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
+        watchedState.posts = [...watchedState.posts, ...postsWithId];
+        watchedState.error = '';
         watchedState.urls.push(url);
+      }).catch((error) => {
+        if (error.isParsingError) {
+          watchedState.error = 'errors.notValidRss';
+        } else if (error.isAxiosError) {
+          watchedState.error = 'errors.networkErr';
+        } else {
+          watchedState.error = 'errors.unknownErr';
+        }
       })
-      .catch((error) => {
-        watchedState.error = error.errors;
-      });
-  });
-  updatePosts();
+    );
 
-  elements.postsEl.addEventListener('click', (e) => {
-    const { id } = e.target.dataset;
-    if (!id) return;
-    watchedState.uiState.readPostsId = [...watchedState.uiState.readPostsId, id];
-    watchedState.uiState.modal.modalId = id;
+    const updatePosts = () => {
+      watchedState.feeds.forEach(({ url, id }) => {
+        axios.get(url).then((response) => {
+          const { posts } = parse(response.data.contents);
+          const prevPostsLinks = watchedState.posts
+            .filter((post) => post.feedId === id)
+            .map((post) => post.link);
+          const newPosts = posts
+            .filter((post) => !prevPostsLinks.includes(post.link))
+            .map((post) => ({ ...post, feedId: id, id: uniqueId() }));
+          if (newPosts.length) {
+            watchedState.posts = [...watchedState.posts, ...newPosts];
+          }
+        }).catch((err) => {
+          throw new Error(`Update posts error. ${err}`);
+        });
+      });
+      setTimeout(updatePosts, 5000);
+    };
+
+    elements.formEl.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const url = formData.get('url');
+      console.log(url);
+      validateUrl(url, watchedState.urls)
+        .then(() => {
+          const proxyUrl = addProxy(url);
+          loadUrl(proxyUrl);
+          watchedState.urls.push(url);
+        })
+        .catch((error) => {
+          watchedState.error = error.errors;
+        });
+    });
+    updatePosts();
+
+    elements.postsEl.addEventListener('click', (e) => {
+      const { id } = e.target.dataset;
+      if (!id) return;
+      watchedState.uiState.readPostsId = [...watchedState.uiState.readPostsId, id];
+      watchedState.uiState.modal.modalId = id;
+    });
   });
 };
 
