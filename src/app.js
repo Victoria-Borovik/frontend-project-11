@@ -2,7 +2,7 @@ import * as yup from 'yup';
 import i18n from 'i18next';
 import axios from 'axios';
 import { uniqueId } from 'lodash';
-import view from './view';
+import watch from './view';
 import resources from './locales/index';
 import parse from './parser';
 
@@ -63,7 +63,7 @@ const app = () => {
     debug: false,
     resources,
   }).then(() => {
-    const watchedState = view(state, elements, i18nInstance);
+    const watchedState = watch(state, elements, i18nInstance);
 
     const loadUrl = (url) => (axios.get(url)
       .then((response) => {
