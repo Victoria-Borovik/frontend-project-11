@@ -16,10 +16,10 @@ const addProxy = (url) => {
 const validateUrl = (url, urls) => {
   yup.setLocale({
     mixed: {
-      notOneOf: () => ('errors.rssDoubling'),
+      notOneOf: 'errors.rssDoubling',
     },
     string: {
-      url: () => ('errors.notValidUrl'),
+      url: 'errors.notValidUrl',
     },
   });
 
