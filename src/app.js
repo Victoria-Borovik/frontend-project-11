@@ -23,10 +23,10 @@ const validateUrl = (url, urls) => {
     },
   });
 
-  const schema = yup.string()
-    .url()
-    .notOneOf(urls);
-  return schema.validate(url);
+  const schema = yup.string().url().notOneOf(urls);
+  return schema.validate(url)
+    .then(() => null)
+    .catch((error) => error.message);
 };
 
 const app = () => {
@@ -111,13 +111,14 @@ const app = () => {
       const formData = new FormData(e.target);
       const url = formData.get('url');
       validateUrl(url, watchedState.urls)
-        .then(() => {
+        .then((error) => {
+          if (error) {
+            watchedState.error = error;
+            return;
+          }
           const proxyUrl = addProxy(url);
           loadUrl(proxyUrl);
           watchedState.urls.push(url);
-        })
-        .catch((error) => {
-          watchedState.error = error.errors;
         });
     });
     updatePosts();
