@@ -110,7 +110,6 @@ const app = () => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const url = formData.get('url');
-      console.log(url);
       validateUrl(url, watchedState.urls)
         .then(() => {
           const proxyUrl = addProxy(url);
