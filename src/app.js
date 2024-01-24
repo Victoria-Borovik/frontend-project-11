@@ -4,6 +4,7 @@ import axios from 'axios';
 import { uniqueId } from 'lodash';
 import watch from './view';
 import resources from './locales/index';
+import customErrors from './locales/customErrors';
 import parse from './parser';
 
 const addProxy = (url) => {
@@ -14,15 +15,6 @@ const addProxy = (url) => {
 };
 
 const validateUrl = (url, urls) => {
-  yup.setLocale({
-    mixed: {
-      notOneOf: 'errors.rssDoubling',
-    },
-    string: {
-      url: 'errors.notValidUrl',
-    },
-  });
-
   const schema = yup.string().url().notOneOf(urls);
   return schema.validate(url)
     .then(() => null)
@@ -63,6 +55,8 @@ const app = () => {
     debug: false,
     resources,
   }).then(() => {
+    yup.setLocale(customErrors);
+
     const watchedState = watch(state, elements, i18nInstance);
 
     const loadUrl = (url) => (axios.get(url)
