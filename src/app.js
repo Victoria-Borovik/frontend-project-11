@@ -11,7 +11,7 @@ const addProxy = (url) => {
   const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
   proxyUrl.searchParams.append('disableCache', 'true');
   proxyUrl.searchParams.append('url', url);
-  return proxyUrl;
+  return proxyUrl.toString();
 };
 
 const validateUrl = (url, urls) => {
@@ -31,7 +31,6 @@ const app = () => {
       status: null,
       error: null,
     },
-    urls: [],
     feeds: [],
     posts: [],
     uiState: {
@@ -68,7 +67,7 @@ const app = () => {
 
     const loadUrl = (url) => {
       watchedState.loadingProcess = { status: 'loading', error: null };
-      return axios.get(url)
+      return axios.get(addProxy(url))
         .then((response) => {
           const { feed, posts } = parse(response.data.contents);
           feed.id = uniqueId();
@@ -77,7 +76,6 @@ const app = () => {
           const postsWithId = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
           watchedState.posts = [...watchedState.posts, ...postsWithId];
           watchedState.loadingProcess = { status: 'success', error: null };
-          state.urls.push(url);
         }).catch((error) => {
           if (error.isParsingError) {
             watchedState.loadingProcess = { status: 'error', error: 'loadingMessages.notValidRss' };
@@ -91,7 +89,7 @@ const app = () => {
 
     const updatePosts = () => {
       watchedState.feeds.forEach(({ url, id }) => {
-        axios.get(url).then((response) => {
+        axios.get(addProxy(url)).then((response) => {
           const { posts } = parse(response.data.contents);
           const prevPostsLinks = watchedState.posts
             .filter((post) => post.feedId === id)
@@ -112,17 +110,16 @@ const app = () => {
     elements.formEl.addEventListener('submit', (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
-      const url = formData.get('url');
-      validateUrl(url, watchedState.urls)
+      const url = formData.get('url').trim();
+      const urls = watchedState.feeds.map((feed) => feed.url);
+      validateUrl(url, urls)
         .then((error) => {
           if (error) {
             watchedState.form = { isValid: false, error };
             return;
           }
-          const proxyUrl = addProxy(url);
           watchedState.form = { isValid: true, error: null };
-          loadUrl(proxyUrl);
-          state.urls.push(url);
+          loadUrl(url);
         });
     });
     updatePosts();

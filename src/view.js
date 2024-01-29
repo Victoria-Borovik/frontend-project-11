@@ -153,7 +153,6 @@ const renderFormResponse = (currValue, elements, i18n) => {
 };
 
 export default (state, elements, i18n) => onChange(state, (path, currValue, prevValue) => {
-  console.log(path);
   const {
     formEl, feedbackEl, inputEl,
     feedsEl, postsEl, modal,
@@ -169,10 +168,6 @@ export default (state, elements, i18n) => onChange(state, (path, currValue, prev
       break;
     case 'loadingProcess':
       renderLoadingResponse(currValue, { feedbackEl, inputEl }, i18n);
-      break;
-    case 'urls':
-      formEl.reset();
-      inputEl.focus();
       break;
     case 'feeds':
       renderFeeds(currValue, prevValue, feedsEl, i18n.t(path));
