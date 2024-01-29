@@ -46,7 +46,7 @@ const app = () => {
     uiState: {
       readPostsId: [],
       modal: {
-        modalId: '',
+        modalId: null,
       },
     },
   };
@@ -55,6 +55,7 @@ const app = () => {
     formEl: document.querySelector('form'),
     feedbackEl: document.querySelector('.feedback'),
     inputEl: document.querySelector('input'),
+    submitEl: document.querySelector('[type="submit"]'),
     feedsEl: document.querySelector('.feeds'),
     postsEl: document.querySelector('.posts'),
     modal: {
@@ -93,19 +94,17 @@ const app = () => {
 
     const updatePosts = () => {
       Promise.all(watchedState.feeds.map(({ url, id }) => (
-        axios.get(addProxy(url))
-          .then((response) => {
-            const { posts } = parse(response.data.contents);
-            const prevPostsLinks = watchedState.posts
-              .filter((post) => post.feedId === id).map(({ link }) => link);
-            const newPostsLinks = posts.filter((post) => !prevPostsLinks.includes(post.link));
-
-            if (newPostsLinks.length === 0) return;
-            const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
-            watchedState.posts = [...watchedState.posts, ...newPosts];
-          }).catch((err) => {
-            throw new Error(`Update posts error. ${err}`);
-          })
+        axios.get(addProxy(url)).then((response) => {
+          const { posts } = parse(response.data.contents);
+          const prevPostsLinks = watchedState.posts
+            .filter((post) => post.feedId === id).map(({ link }) => link);
+          const newPostsLinks = posts.filter((post) => !prevPostsLinks.includes(post.link));
+          if (!newPostsLinks.length) return;
+          const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
+          watchedState.posts = [...watchedState.posts, ...newPosts];
+        }).catch((err) => {
+          throw new Error(`Update posts error. ${err}`);
+        })
       ))).then(() => setTimeout(updatePosts, 5000));
     };
 
@@ -120,14 +119,15 @@ const app = () => {
             watchedState.form = { isValid: false, error };
             return;
           }
-          loadUrl(url);
           watchedState.form = { isValid: true, error: null };
+          loadUrl(url);
         });
     });
 
     elements.postsEl.addEventListener('click', (e) => {
       const { id } = e.target.dataset;
       if (!id) return;
+      if (watchedState.uiState.readPostsId.includes(id)) return;
       watchedState.uiState.readPostsId = [...watchedState.uiState.readPostsId, id];
       watchedState.uiState.modal.modalId = id;
     });

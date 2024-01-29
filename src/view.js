@@ -119,55 +119,70 @@ const renderFeeds = (currValue, prevValue, container, containerHeader) => {
 
 const renderLoadingResponse = (currValue, elements, i18n) => {
   const { status, error } = currValue;
-  const { feedbackEl, inputEl } = elements;
+  const {
+    feedbackEl, inputEl, formEl, submitEl,
+  } = elements;
   switch (status) {
     case 'loading':
-      // блокировка поля ввода
-      // блокировка кнопки
+      inputEl.setAttribute('disabled', 'true');
+      submitEl.setAttribute('disabled', 'true');
       break;
     case 'success':
       feedbackEl.textContent = i18n.t('loadingMessages.success');
       feedbackEl.classList.add('text-success');
+      inputEl.removeAttribute('disabled');
+      submitEl.removeAttribute('disabled');
+      formEl.reset();
+      inputEl.focus();
       break;
     case 'error':
       feedbackEl.textContent = i18n.t(error);
       feedbackEl.classList.add('text-danger');
       inputEl.classList.add('is-invalid');
+      inputEl.focus();
       break;
     default:
       feedbackEl.textContent = i18n.t('loadingMessages.unknownErr');
       feedbackEl.classList.add('text-danger');
       inputEl.classList.add('is-invalid');
+      inputEl.removeAttribute('disabled');
+      submitEl.removeAttribute('disabled');
+      inputEl.focus();
       break;
   }
 };
 
 const renderFormResponse = (currValue, elements, i18n) => {
   const { isValid, error } = currValue;
-  const { feedbackEl, inputEl } = elements;
-  if (!isValid) {
+  const { feedbackEl, inputEl, formEl } = elements;
+  if (isValid) {
+    feedbackEl.textContent = '';
+    feedbackEl.classList.remove('text-success', 'text-danger');
+    inputEl.classList.remove('is-invalid');
+  } else {
     feedbackEl.textContent = i18n.t(error);
     feedbackEl.classList.add('text-danger');
     inputEl.classList.add('is-invalid');
+    formEl.reset();
+    inputEl.focus();
   }
 };
 
 export default (state, elements, i18n) => onChange(state, (path, currValue, prevValue) => {
+  console.log(path);
   const {
-    formEl, feedbackEl, inputEl,
+    formEl, feedbackEl, inputEl, submitEl,
     feedsEl, postsEl, modal,
   } = elements;
 
-  feedbackEl.textContent = '';
-  feedbackEl.classList.remove('text-success', 'text-danger');
-  inputEl.classList.remove('is-invalid');
-
   switch (path) {
     case 'form':
-      renderFormResponse(currValue, { feedbackEl, inputEl }, i18n);
+      renderFormResponse(currValue, { feedbackEl, inputEl, formEl }, i18n);
       break;
     case 'loadingProcess':
-      renderLoadingResponse(currValue, { feedbackEl, inputEl }, i18n);
+      renderLoadingResponse(currValue, {
+        feedbackEl, inputEl, formEl, submitEl,
+      }, i18n);
       break;
     case 'feeds':
       renderFeeds(currValue, prevValue, feedsEl, i18n.t(path));
