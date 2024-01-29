@@ -92,23 +92,21 @@ const app = () => {
     };
 
     const updatePosts = () => {
-      watchedState.feeds.forEach(({ url, id }) => {
-        axios.get(addProxy(url)).then((response) => {
-          const { posts } = parse(response.data.contents);
-          const prevPostsLinks = watchedState.posts
-            .filter((post) => post.feedId === id)
-            .map((post) => post.link);
-          const newPosts = posts
-            .filter((post) => !prevPostsLinks.includes(post.link))
-            .map((post) => ({ ...post, feedId: id, id: uniqueId() }));
-          if (newPosts.length) {
+      Promise.all(watchedState.feeds.map(({ url, id }) => (
+        axios.get(addProxy(url))
+          .then((response) => {
+            const { posts } = parse(response.data.contents);
+            const prevPostsLinks = watchedState.posts
+              .filter((post) => post.feedId === id).map(({ link }) => link);
+            const newPostsLinks = posts.filter((post) => !prevPostsLinks.includes(post.link));
+
+            if (newPostsLinks.length === 0) return;
+            const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
             watchedState.posts = [...watchedState.posts, ...newPosts];
-          }
-        }).catch((err) => {
-          throw new Error(`Update posts error. ${err}`);
-        });
-      });
-      setTimeout(updatePosts, 5000);
+          }).catch((err) => {
+            throw new Error(`Update posts error. ${err}`);
+          })
+      ))).then(() => setTimeout(updatePosts, 5000));
     };
 
     elements.formEl.addEventListener('submit', (e) => {
@@ -126,7 +124,6 @@ const app = () => {
           watchedState.form = { isValid: true, error: null };
         });
     });
-    updatePosts();
 
     elements.postsEl.addEventListener('click', (e) => {
       const { id } = e.target.dataset;
@@ -134,6 +131,7 @@ const app = () => {
       watchedState.uiState.readPostsId = [...watchedState.uiState.readPostsId, id];
       watchedState.uiState.modal.modalId = id;
     });
+    updatePosts();
   });
 };
 
