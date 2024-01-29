@@ -7,15 +7,15 @@ export default {
       read: 'Читать полностью',
       close: 'Закрыть',
     },
-    validationMessage: {
+    loadingMessages: {
+      notValidRss: 'Ресурс не содержит валидный RSS',
+      networkErr: 'Ошибка сети',
+      unknownErr: 'Неизвестная ошибка',
       success: 'RSS успешно загружен',
     },
-    errors: {
+    validationMessages: {
       notValidUrl: 'Ссылка должна быть валидным URL',
-      notValidRss: 'Ресурс не содержит валидный RSS',
       rssDoubling: 'RSS уже существует',
-      networkErr: 'Ошибка сети',
-      unknownErr: 'Если бы мы знали, что это такое, мы не знаем что это такое',
     },
   },
 };

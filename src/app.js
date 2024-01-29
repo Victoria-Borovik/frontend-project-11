@@ -23,8 +23,15 @@ const validateUrl = (url, urls) => {
 
 const app = () => {
   const state = {
+    form: {
+      isValid: false,
+      error: null,
+    },
+    loadingProcess: {
+      status: null,
+      error: null,
+    },
     urls: [],
-    error: '',
     feeds: [],
     posts: [],
     uiState: {
@@ -59,26 +66,28 @@ const app = () => {
 
     const watchedState = watch(state, elements, i18nInstance);
 
-    const loadUrl = (url) => (axios.get(url)
-      .then((response) => {
-        const { feed, posts } = parse(response.data.contents);
-        feed.id = uniqueId();
-        feed.url = url;
-        watchedState.feeds = [...watchedState.feeds, feed];
-        const postsWithId = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
-        watchedState.posts = [...watchedState.posts, ...postsWithId];
-        watchedState.error = '';
-        watchedState.urls.push(url);
-      }).catch((error) => {
-        if (error.isParsingError) {
-          watchedState.error = 'errors.notValidRss';
-        } else if (error.isAxiosError) {
-          watchedState.error = 'errors.networkErr';
-        } else {
-          watchedState.error = 'errors.unknownErr';
-        }
-      })
-    );
+    const loadUrl = (url) => {
+      watchedState.loadingProcess = { status: 'loading', error: null };
+      return axios.get(url)
+        .then((response) => {
+          const { feed, posts } = parse(response.data.contents);
+          feed.id = uniqueId();
+          feed.url = url;
+          watchedState.feeds = [...watchedState.feeds, feed];
+          const postsWithId = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
+          watchedState.posts = [...watchedState.posts, ...postsWithId];
+          watchedState.loadingProcess = { status: 'success', error: null };
+          state.urls.push(url);
+        }).catch((error) => {
+          if (error.isParsingError) {
+            watchedState.loadingProcess = { status: 'error', error: 'loadingMessages.notValidRss' };
+          } else if (error.isAxiosError) {
+            watchedState.loadingProcess = { status: 'error', error: 'loadingMessages.networkErr' };
+          } else {
+            watchedState.loadingProcess = { status: 'error', error: 'loadingMessages.unknownErr' };
+          }
+        });
+    };
 
     const updatePosts = () => {
       watchedState.feeds.forEach(({ url, id }) => {
@@ -107,12 +116,13 @@ const app = () => {
       validateUrl(url, watchedState.urls)
         .then((error) => {
           if (error) {
-            watchedState.error = error;
+            watchedState.form = { isValid: false, error };
             return;
           }
           const proxyUrl = addProxy(url);
+          watchedState.form = { isValid: true, error: null };
           loadUrl(proxyUrl);
-          watchedState.urls.push(url);
+          state.urls.push(url);
         });
     });
     updatePosts();

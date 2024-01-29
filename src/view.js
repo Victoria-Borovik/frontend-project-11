@@ -117,7 +117,43 @@ const renderFeeds = (currValue, prevValue, container, containerHeader) => {
   dataList.prepend(feedItem);
 };
 
+const renderLoadingResponse = (currValue, elements, i18n) => {
+  const { status, error } = currValue;
+  const { feedbackEl, inputEl } = elements;
+  switch (status) {
+    case 'loading':
+      // блокировка поля ввода
+      // блокировка кнопки
+      break;
+    case 'success':
+      feedbackEl.textContent = i18n.t('loadingMessages.success');
+      feedbackEl.classList.add('text-success');
+      break;
+    case 'error':
+      feedbackEl.textContent = i18n.t(error);
+      feedbackEl.classList.add('text-danger');
+      inputEl.classList.add('is-invalid');
+      break;
+    default:
+      feedbackEl.textContent = i18n.t('loadingMessages.unknownErr');
+      feedbackEl.classList.add('text-danger');
+      inputEl.classList.add('is-invalid');
+      break;
+  }
+};
+
+const renderFormResponse = (currValue, elements, i18n) => {
+  const { isValid, error } = currValue;
+  const { feedbackEl, inputEl } = elements;
+  if (!isValid) {
+    feedbackEl.textContent = i18n.t(error);
+    feedbackEl.classList.add('text-danger');
+    inputEl.classList.add('is-invalid');
+  }
+};
+
 export default (state, elements, i18n) => onChange(state, (path, currValue, prevValue) => {
+  console.log(path);
   const {
     formEl, feedbackEl, inputEl,
     feedsEl, postsEl, modal,
@@ -128,16 +164,15 @@ export default (state, elements, i18n) => onChange(state, (path, currValue, prev
   inputEl.classList.remove('is-invalid');
 
   switch (path) {
+    case 'form':
+      renderFormResponse(currValue, { feedbackEl, inputEl }, i18n);
+      break;
+    case 'loadingProcess':
+      renderLoadingResponse(currValue, { feedbackEl, inputEl }, i18n);
+      break;
     case 'urls':
-      feedbackEl.textContent = i18n.t('validationMessage.success');
-      feedbackEl.classList.add('text-success');
       formEl.reset();
       inputEl.focus();
-      break;
-    case 'error':
-      feedbackEl.textContent = i18n.t(currValue);
-      feedbackEl.classList.add('text-danger');
-      inputEl.classList.add('is-invalid');
       break;
     case 'feeds':
       renderFeeds(currValue, prevValue, feedsEl, i18n.t(path));

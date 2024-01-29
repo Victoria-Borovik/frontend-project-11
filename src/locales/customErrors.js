@@ -1,8 +1,8 @@
 export default {
   mixed: {
-    notOneOf: 'errors.rssDoubling',
+    notOneOf: 'validationMessages.rssDoubling',
   },
   string: {
-    url: 'errors.notValidUrl',
+    url: 'validationMessages.notValidUrl',
   },
 };
