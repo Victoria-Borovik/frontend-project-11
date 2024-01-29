@@ -11,7 +11,7 @@ const addProxy = (url) => {
   const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
   proxyUrl.searchParams.append('disableCache', 'true');
   proxyUrl.searchParams.append('url', url);
-  return proxyUrl.toString();
+  return proxyUrl;
 };
 
 const validateUrl = (url, urls) => {
@@ -19,6 +19,16 @@ const validateUrl = (url, urls) => {
   return schema.validate(url)
     .then(() => null)
     .catch((error) => error.message);
+};
+
+const processLoadingErr = (error) => {
+  if (error.isParsingError) {
+    return 'loadingMessages.notValidRss';
+  }
+  if (error.isAxiosError) {
+    return 'loadingMessages.networkErr';
+  }
+  return 'loadingMessages.unknownErr';
 };
 
 const app = () => {
@@ -77,13 +87,7 @@ const app = () => {
           watchedState.posts = [...watchedState.posts, ...postsWithId];
           watchedState.loadingProcess = { status: 'success', error: null };
         }).catch((error) => {
-          if (error.isParsingError) {
-            watchedState.loadingProcess = { status: 'error', error: 'loadingMessages.notValidRss' };
-          } else if (error.isAxiosError) {
-            watchedState.loadingProcess = { status: 'error', error: 'loadingMessages.networkErr' };
-          } else {
-            watchedState.loadingProcess = { status: 'error', error: 'loadingMessages.unknownErr' };
-          }
+          watchedState.loadingProcess = { status: 'error', error: processLoadingErr(error) };
         });
     };
 
@@ -118,8 +122,8 @@ const app = () => {
             watchedState.form = { isValid: false, error };
             return;
           }
-          watchedState.form = { isValid: true, error: null };
           loadUrl(url);
+          watchedState.form = { isValid: true, error: null };
         });
     });
     updatePosts();
