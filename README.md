@@ -18,10 +18,10 @@ Add your RSS feed in the input feeld. You could add as much feeds as you want.
 <img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/653b98bc-aa7f-4b7b-a35d-ca4eb57f03bd">
 
 Message down the input feeld inform if somthing is wrong.
-<img width="560" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/77d9ec12-5006-4e51-ad71-9924a8a44bc8">
+<img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/77d9ec12-5006-4e51-ad71-9924a8a44bc8">
 
 New posts update automaticly.
-<img width="803" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/a550a3e7-5457-4c71-a1cd-dea165087b02">
+<img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/a550a3e7-5457-4c71-a1cd-dea165087b02">
 
 
 
