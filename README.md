@@ -5,7 +5,7 @@
 # News aggregator
 Aggregates RSS feeds in one location and keeps track of its updates.
 
-[Cliсk to see how this works](https://frontend-project-11-gamma-seven.vercel.app/)
+[Cliсk to see how it works](https://frontend-project-11-gamma-seven.vercel.app/)
 
 ### Install
 ```
@@ -17,10 +17,10 @@ make install
 Add your RSS feed in the input feeld. You could add as much feeds as you want.
 <img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/653b98bc-aa7f-4b7b-a35d-ca4eb57f03bd">
 
-Message down the input feeld inform if somthing is wrong.
-<img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/77d9ec12-5006-4e51-ad71-9924a8a44bc8">
+A message informs you if something is wrong.
+<img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/d7c35bd7-4be9-4b24-aced-4087f7c99fed">
 
-New posts update automaticly.
+New posts will be shown down below. Feeds update automaticly.
 <img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/a550a3e7-5457-4c71-a1cd-dea165087b02">
 
 
