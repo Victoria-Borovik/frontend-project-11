@@ -124,29 +124,31 @@ const renderLoadingResponse = (currValue, elements, i18n) => {
   } = elements;
   switch (status) {
     case 'loading':
-      inputEl.setAttribute('disabled', 'true');
       submitEl.setAttribute('disabled', 'true');
+      inputEl.setAttribute('disabled', 'true');
       break;
     case 'success':
       feedbackEl.textContent = i18n.t('loadingMessages.success');
       feedbackEl.classList.add('text-success');
-      inputEl.removeAttribute('disabled');
       submitEl.removeAttribute('disabled');
-      formEl.reset();
+      inputEl.removeAttribute('disabled');
       inputEl.focus();
+      formEl.reset();
       break;
     case 'error':
       feedbackEl.textContent = i18n.t(error);
       feedbackEl.classList.add('text-danger');
+      submitEl.removeAttribute('disabled');
+      inputEl.removeAttribute('disabled');
       inputEl.classList.add('is-invalid');
       inputEl.focus();
       break;
     default:
       feedbackEl.textContent = i18n.t('loadingMessages.unknownErr');
       feedbackEl.classList.add('text-danger');
+      submitEl.removeAttribute('disabled');
       inputEl.classList.add('is-invalid');
       inputEl.removeAttribute('disabled');
-      submitEl.removeAttribute('disabled');
       inputEl.focus();
       break;
   }
@@ -154,7 +156,7 @@ const renderLoadingResponse = (currValue, elements, i18n) => {
 
 const renderFormResponse = (currValue, elements, i18n) => {
   const { isValid, error } = currValue;
-  const { feedbackEl, inputEl, formEl } = elements;
+  const { feedbackEl, inputEl } = elements;
   if (isValid) {
     feedbackEl.textContent = '';
     feedbackEl.classList.remove('text-success', 'text-danger');
@@ -163,7 +165,6 @@ const renderFormResponse = (currValue, elements, i18n) => {
     feedbackEl.textContent = i18n.t(error);
     feedbackEl.classList.add('text-danger');
     inputEl.classList.add('is-invalid');
-    formEl.reset();
     inputEl.focus();
   }
 };
