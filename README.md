@@ -17,7 +17,7 @@ Open in development mode to run a localhost server with live reloading:
 ```
 make develop
 ```
-Open in production mode to on minify bundles and improve load time:
+Open in production mode to minify bundles and improve load time:
 ```
 make build
 ```
