@@ -1,7 +1,7 @@
 import onChange from 'on-change';
 import { differenceBy, difference } from 'lodash';
 
-const fillInModal = (state, currId, modal, i18n) => {
+const renderModal = (state, currId, modal, i18n) => {
   const {
     titleEl, descEl,
     linkEl, closeEl,
@@ -14,7 +14,7 @@ const fillInModal = (state, currId, modal, i18n) => {
   closeEl.textContent = i18n.t('modal.close');
 };
 
-const checkReadPosts = (prevIds, currIds) => {
+const renderReadPosts = (prevIds, currIds) => {
   const newId = difference(currIds, prevIds);
   const readItem = document.querySelector(`a[data-id="${newId}"]`);
   readItem.classList.remove('fw-bold');
@@ -169,7 +169,6 @@ const renderFormResponse = (currValue, elements, i18n) => {
 };
 
 export default (state, elements, i18n) => onChange(state, (path, currValue, prevValue) => {
-  console.log(path);
   const {
     formEl, feedbackEl, inputEl, submitEl,
     feedsEl, postsEl, modal,
@@ -191,10 +190,10 @@ export default (state, elements, i18n) => onChange(state, (path, currValue, prev
       renderPosts(currValue, prevValue, postsEl, i18n.t(path), i18n.t('button'));
       break;
     case 'uiState.readPostsId':
-      checkReadPosts(prevValue, currValue);
+      renderReadPosts(prevValue, currValue);
       break;
     case 'uiState.modal.modalId':
-      fillInModal(state, currValue, modal, i18n);
+      renderModal(state, currValue, modal, i18n);
       break;
     default:
       throw new Error('Unknown change');

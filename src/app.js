@@ -97,7 +97,7 @@ const app = () => {
         axios.get(addProxy(url)).then((response) => {
           const { posts } = parse(response.data.contents);
           const prevPostsLinks = watchedState.posts
-            .filter((post) => post.feedId === id).map(({ link }) => link);
+            .filter((post) => post.feedId === id).map((post) => post.link);
           const newPostsLinks = posts.filter((post) => !prevPostsLinks.includes(post.link));
           if (!newPostsLinks.length) return;
           const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
