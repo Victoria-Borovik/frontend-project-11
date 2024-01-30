@@ -18,7 +18,7 @@ Add your RSS feed in the input field. You could add as many feeds as you want.
 <img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/653b98bc-aa7f-4b7b-a35d-ca4eb57f03bd">
 
 A message informs you if something is wrong.
-<img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/d7c35bd7-4be9-4b24-aced-4087f7c99fed">
+<img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/f3b35541-3cb0-404d-9bf9-a7d372b0414c">
 
 New posts will be shown down below. Feeds update automatically.
 <img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/a550a3e7-5457-4c71-a1cd-dea165087b02">
