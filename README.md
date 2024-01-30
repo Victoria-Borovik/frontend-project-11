@@ -13,6 +13,15 @@ git clone git@github.com:Victoria-Borovik/frontend-project-11.git
 cd frontend-project-11
 make install
 ```
+Open in development mode to run a localhost server with live reloading:
+```
+make develop
+```
+Open in production mode to on minify bundles and improve load time:
+```
+make build
+```
+
 ### Usage
 Add your RSS feed in the input field. You could add as many feeds as you want.
 <img width="721" alt="image" src="https://github.com/Victoria-Borovik/frontend-project-11/assets/103994412/653b98bc-aa7f-4b7b-a35d-ca4eb57f03bd">
