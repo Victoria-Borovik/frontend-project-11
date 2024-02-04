@@ -11,7 +11,7 @@ const addProxy = (url) => {
   const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
   proxyUrl.searchParams.append('disableCache', 'true');
   proxyUrl.searchParams.append('url', url);
-  return proxyUrl;
+  return proxyUrl.toString();
 };
 
 const validateUrl = (url, urls) => {
@@ -21,7 +21,7 @@ const validateUrl = (url, urls) => {
     .catch((error) => error.message);
 };
 
-const processLoadingErr = (error) => {
+const getLoadingError = (error) => {
   if (error.isParsingError) {
     return 'loadingMessages.notValidRss';
   }
@@ -44,7 +44,7 @@ const app = () => {
     feeds: [],
     posts: [],
     uiState: {
-      readPostsId: [],
+      readPostsId: new Set(),
       modal: {
         modalId: null,
       },
@@ -88,7 +88,7 @@ const app = () => {
           watchedState.posts = [...watchedState.posts, ...postsWithId];
           watchedState.loadingProcess = { status: 'success', error: null };
         }).catch((error) => {
-          watchedState.loadingProcess = { status: 'error', error: processLoadingErr(error) };
+          watchedState.loadingProcess = { status: 'error', error: getLoadingError(error) };
         });
     };
 
@@ -97,7 +97,8 @@ const app = () => {
         axios.get(addProxy(url)).then((response) => {
           const { posts } = parse(response.data.contents);
           const prevPostsLinks = watchedState.posts
-            .filter((post) => post.feedId === id).map((post) => post.link);
+            .filter((post) => post.feedId === id)
+            .map((post) => post.link);
           const newPostsLinks = posts.filter((post) => !prevPostsLinks.includes(post.link));
           if (!newPostsLinks.length) return;
           const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
@@ -127,8 +128,7 @@ const app = () => {
     elements.postsEl.addEventListener('click', (e) => {
       const { id } = e.target.dataset;
       if (!id) return;
-      if (watchedState.uiState.readPostsId.includes(id)) return;
-      watchedState.uiState.readPostsId = [...watchedState.uiState.readPostsId, id];
+      watchedState.uiState.readPostsId.add(id);
       watchedState.uiState.modal.modalId = id;
     });
     updatePosts();
