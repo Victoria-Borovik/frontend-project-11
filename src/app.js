@@ -103,9 +103,7 @@ const app = () => {
           if (!newPostsLinks.length) return;
           const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
           watchedState.posts = [...watchedState.posts, ...newPosts];
-        }).catch((err) => {
-          throw new Error(`Update posts error. ${err}`);
-        })
+        }).catch(console.error)
       ))).then(() => setTimeout(updatePosts, 5000));
     };
 

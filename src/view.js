@@ -15,13 +15,16 @@ const renderModal = (state, currId, modal, i18n) => {
 };
 
 const renderReadPosts = (prevIds, currIds) => {
-  const newId = difference(currIds, prevIds);
+  const newId = difference([...currIds], [...prevIds]);
   const readItem = document.querySelector(`a[data-id="${newId}"]`);
   readItem.classList.remove('fw-bold');
   readItem.classList.add('fw-normal', 'link-secondary');
 };
 
-const createDataList = (container, containerHeader) => {
+const getDataList = (container, containerHeader) => {
+  if (container.childNodes.length) {
+    return container.querySelector('ul');
+  }
   const card = document.createElement('div');
   card.classList.add('card', 'border-0');
 
@@ -37,6 +40,7 @@ const createDataList = (container, containerHeader) => {
   cardList.classList.add('list-group', 'border-0', 'rounded-0');
   card.append(cardName, cardList);
   container.append(card);
+  return cardList;
 };
 
 const createPostsList = (posts, btnName) => posts.map((post) => {
@@ -76,10 +80,7 @@ const createPostsList = (posts, btnName) => posts.map((post) => {
 });
 
 const renderPosts = (currValue, prevValue, container, containerHeader, btnName) => {
-  if (!prevValue.length) {
-    createDataList(container, containerHeader);
-  }
-  const dataList = container.querySelector('ul');
+  const dataList = getDataList(container, containerHeader);
   const posts = (prevValue.length)
     ? differenceBy(currValue, prevValue, 'id')
     : currValue;
@@ -105,10 +106,7 @@ const createFeedItem = ([{ title, description }]) => {
 };
 
 const renderFeeds = (currValue, prevValue, container, containerHeader) => {
-  if (!prevValue.length) {
-    createDataList(container, containerHeader);
-  }
-  const dataList = container.querySelector('ul');
+  const dataList = getDataList(container, containerHeader);
   const feed = (prevValue.lengt)
     ? currValue
     : differenceBy(currValue, prevValue, 'id');
@@ -197,6 +195,7 @@ export default (state, elements, i18n) => onChange(state, (path, currValue, prev
       renderModal(state, currValue, modal, i18n);
       break;
     default:
-      throw new Error('Unknown change');
+      console.error(`Unknown state to change - ${path}`);
+      break;
   }
 });
