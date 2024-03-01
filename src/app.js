@@ -38,13 +38,13 @@ const app = () => {
       error: null,
     },
     loadingProcess: {
-      status: null,
+      status: 'idle',
       error: null,
     },
     feeds: [],
     posts: [],
     uiState: {
-      readPostsId: new Set(),
+      seenPostIds: new Set(),
       modal: {
         modalId: null,
       },
@@ -52,17 +52,17 @@ const app = () => {
   };
 
   const elements = {
-    formEl: document.querySelector('form'),
-    feedbackEl: document.querySelector('.feedback'),
-    inputEl: document.querySelector('input'),
-    submitEl: document.querySelector('[type="submit"]'),
-    feedsEl: document.querySelector('.feeds'),
-    postsEl: document.querySelector('.posts'),
+    form: document.querySelector('form'),
+    feedback: document.querySelector('.feedback'),
+    input: document.querySelector('input'),
+    submit: document.querySelector('[type="submit"]'),
+    feeds: document.querySelector('.feeds'),
+    posts: document.querySelector('.posts'),
     modal: {
-      titleEl: document.querySelector('.modal-title'),
-      descEl: document.querySelector('.modal-body'),
-      linkEl: document.querySelector('.modal-footer a'),
-      closeEl: document.querySelector('.modal-footer button[type="button"]'),
+      title: document.querySelector('.modal-title'),
+      description: document.querySelector('.modal-body'),
+      link: document.querySelector('.modal-footer a'),
+      close: document.querySelector('.modal-footer button[type="button"]'),
     },
   };
 
@@ -84,8 +84,8 @@ const app = () => {
           feed.id = uniqueId();
           feed.url = url;
           watchedState.feeds = [...watchedState.feeds, feed];
-          const postsWithId = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
-          watchedState.posts = [...watchedState.posts, ...postsWithId];
+          const relatedPosts = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
+          watchedState.posts = [...watchedState.posts, ...relatedPosts];
           watchedState.loadingProcess = { status: 'success', error: null };
         }).catch((error) => {
           watchedState.loadingProcess = { status: 'error', error: getLoadingError(error) };
@@ -93,7 +93,7 @@ const app = () => {
     };
 
     const updatePosts = () => {
-      Promise.all(watchedState.feeds.map(({ url, id }) => (
+      const updatedPosts = (watchedState.feeds.map(({ url, id }) => (
         axios.get(addProxy(url)).then((response) => {
           const { posts } = parse(response.data.contents);
           const prevPostsLinks = watchedState.posts
@@ -104,10 +104,11 @@ const app = () => {
           const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
           watchedState.posts = [...watchedState.posts, ...newPosts];
         }).catch(console.error)
-      ))).then(() => setTimeout(updatePosts, 5000));
+      )));
+      Promise.all(updatedPosts).then(() => setTimeout(updatePosts, 5000));
     };
 
-    elements.formEl.addEventListener('submit', (e) => {
+    elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
       const url = formData.get('url').trim();
@@ -123,10 +124,10 @@ const app = () => {
         });
     });
 
-    elements.postsEl.addEventListener('click', (e) => {
+    elements.posts.addEventListener('click', (e) => {
       const { id } = e.target.dataset;
       if (!id) return;
-      watchedState.uiState.readPostsId.add(id);
+      watchedState.uiState.seenPostIds.add(id);
       watchedState.uiState.modal.modalId = id;
     });
     updatePosts();
