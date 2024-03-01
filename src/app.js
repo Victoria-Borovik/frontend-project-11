@@ -85,7 +85,7 @@ const app = () => {
           feed.url = url;
           watchedState.feeds = [...watchedState.feeds, feed];
           const relatedPosts = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
-          watchedState.posts = [...watchedState.posts, ...relatedPosts];
+          watchedState.posts = [...relatedPosts, ...watchedState.posts];
           watchedState.loadingProcess = { status: 'success', error: null };
         }).catch((error) => {
           watchedState.loadingProcess = { status: 'error', error: getLoadingError(error) };
@@ -102,7 +102,7 @@ const app = () => {
           const newPostsLinks = posts.filter((post) => !prevPostsLinks.includes(post.link));
           if (!newPostsLinks.length) return;
           const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
-          watchedState.posts = [...watchedState.posts, ...newPosts];
+          watchedState.posts = [...newPosts, ...watchedState.posts];
         }).catch(console.error)
       )));
       Promise.all(updatedPosts).then(() => setTimeout(updatePosts, 5000));

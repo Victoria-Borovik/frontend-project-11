@@ -104,7 +104,6 @@ const renderFeeds = ({ feeds }, container, containerHeader) => {
 };
 
 const renderLoadingResponse = (value, elements, i18n) => {
-  console.log(value);
   const { status, error } = value;
   const {
     feedback, input, form, submit,
@@ -172,7 +171,7 @@ export default (state, elements, i18n) => onChange(state, (path, value) => {
       renderPosts(state, posts, i18n.t(path), i18n.t('button'));
       break;
     case 'uiState.seenPostIds':
-      renderPosts(state, posts, i18n.t(path), i18n.t('button'));
+      renderPosts(state, posts, i18n.t('posts'), i18n.t('button'));
       break;
     case 'uiState.modal.modalId':
       renderModal(state, value, modal, i18n);
