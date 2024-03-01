@@ -83,7 +83,7 @@ const app = () => {
           const { feed, posts } = parse(response.data.contents);
           feed.id = uniqueId();
           feed.url = url;
-          watchedState.feeds = [...watchedState.feeds, feed];
+          watchedState.feeds = [feed, ...watchedState.feeds];
           const relatedPosts = posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
           watchedState.posts = [...relatedPosts, ...watchedState.posts];
           watchedState.loadingProcess = { status: 'success', error: null };
