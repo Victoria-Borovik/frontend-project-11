@@ -1,29 +1,23 @@
 import onChange from 'on-change';
-import { differenceBy, difference } from 'lodash';
 
 const renderModal = (state, currId, modal, i18n) => {
   const {
-    titleEl, descEl,
-    linkEl, closeEl,
+    title, description,
+    link, close,
   } = modal;
-  const [{ title, description, link }] = state.posts.filter((post) => post.id === currId);
-  titleEl.textContent = title;
-  descEl.textContent = description;
-  linkEl.setAttribute('href', link);
-  linkEl.textContent = i18n.t('modal.read');
-  closeEl.textContent = i18n.t('modal.close');
-};
-
-const renderReadPosts = (prevIds, currIds) => {
-  const newId = difference([...currIds], [...prevIds]);
-  const readItem = document.querySelector(`a[data-id="${newId}"]`);
-  readItem.classList.remove('fw-bold');
-  readItem.classList.add('fw-normal', 'link-secondary');
+  const post = state.posts.find(({ id }) => id === currId);
+  if (post) {
+    title.textContent = post.title;
+    description.textContent = post.description;
+    link.setAttribute('href', post.link);
+    link.textContent = i18n.t('modal.read');
+    close.textContent = i18n.t('modal.close');
+  }
 };
 
 const getDataList = (container, containerHeader) => {
-  if (container.childNodes.length) {
-    return container.querySelector('ul');
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
   }
   const card = document.createElement('div');
   card.classList.add('card', 'border-0');
@@ -43,156 +37,145 @@ const getDataList = (container, containerHeader) => {
   return cardList;
 };
 
-const createPostsList = (posts, btnName) => posts.map((post) => {
-  const {
-    title, link, feedId, id,
-  } = post;
-
-  const postItem = document.createElement('li');
-  postItem.classList.add(
-    'list-group-item',
-    'd-flex',
-    'border-0',
-    'border-end-0',
-    'justify-content-between',
-    'align-items-start',
-  );
-
-  const postHeader = document.createElement('a');
-  postHeader.classList.add('fw-bold');
-  postHeader.setAttribute('href', link);
-  postHeader.setAttribute('target', '_blank');
-  postHeader.setAttribute('rel', 'noopener noreferrer');
-  postHeader.dataset.feedId = feedId;
-  postHeader.dataset.id = id;
-  postHeader.textContent = title;
-
-  const postSubmit = document.createElement('button');
-  postSubmit.classList.add('btn', 'btn-outline-primary', 'btn-sm');
-  postSubmit.setAttribute('type', 'button');
-  postSubmit.dataset.feedId = feedId;
-  postSubmit.dataset.id = id;
-  postSubmit.dataset.bsToggle = 'modal';
-  postSubmit.dataset.bsTarget = '#modal';
-  postSubmit.textContent = btnName;
-  postItem.append(postHeader, postSubmit);
-  return postItem;
-});
-
-const renderPosts = (currValue, prevValue, container, containerHeader, btnName) => {
+const renderPosts = ({ posts, uiState }, container, containerHeader, btnName) => {
   const dataList = getDataList(container, containerHeader);
-  const posts = (prevValue.length)
-    ? differenceBy(currValue, prevValue, 'id')
-    : currValue;
+  const postItems = posts.map((post) => {
+    const {
+      title, link, feedId, id,
+    } = post;
 
-  const postsItems = createPostsList(posts, btnName);
-  dataList.prepend(...postsItems);
+    const postItem = document.createElement('li');
+    postItem.classList.add(
+      'list-group-item',
+      'd-flex',
+      'border-0',
+      'border-end-0',
+      'justify-content-between',
+      'align-items-start',
+    );
+
+    const postHeader = document.createElement('a');
+    if (uiState.seenPostIds.has(id)) {
+      postHeader.classList.add('fw-normal', 'link-secondary');
+    } else {
+      postHeader.classList.add('fw-bold');
+    }
+    postHeader.setAttribute('href', link);
+    postHeader.setAttribute('target', '_blank');
+    postHeader.setAttribute('rel', 'noopener noreferrer');
+    postHeader.dataset.feedId = feedId;
+    postHeader.dataset.id = id;
+    postHeader.textContent = title;
+
+    const postSubmit = document.createElement('button');
+    postSubmit.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+    postSubmit.setAttribute('type', 'button');
+    postSubmit.dataset.feedId = feedId;
+    postSubmit.dataset.id = id;
+    postSubmit.dataset.bsToggle = 'modal';
+    postSubmit.dataset.bsTarget = '#modal';
+    postSubmit.textContent = btnName;
+    postItem.append(postHeader, postSubmit);
+    return postItem;
+  });
+
+  dataList.append(...postItems);
 };
 
-const createFeedItem = ([{ title, description }]) => {
-  const feedItem = document.createElement('li');
-  feedItem.classList.add('list-group-item', 'border-0', 'border-end-0');
-
-  const feedHeader = document.createElement('h3');
-  feedHeader.classList.add('h6', 'm-0');
-  feedHeader.textContent = title;
-
-  const feedDesc = document.createElement('p');
-  feedDesc.classList.add('m-0', 'small', 'text-black-50');
-  feedDesc.textContent = description;
-  feedItem.append(feedHeader, feedDesc);
-
-  return feedItem;
-};
-
-const renderFeeds = (currValue, prevValue, container, containerHeader) => {
+const renderFeeds = ({ feeds }, container, containerHeader) => {
   const dataList = getDataList(container, containerHeader);
-  const feed = (prevValue.lengt)
-    ? currValue
-    : differenceBy(currValue, prevValue, 'id');
-  const feedItem = createFeedItem(feed);
+  const feedItems = feeds.map(({ title, description }) => {
+    const feedItem = document.createElement('li');
+    feedItem.classList.add('list-group-item', 'border-0', 'border-end-0');
 
-  dataList.prepend(feedItem);
+    const feedHeader = document.createElement('h3');
+    feedHeader.classList.add('h6', 'm-0');
+    feedHeader.textContent = title;
+
+    const feedDesc = document.createElement('p');
+    feedDesc.classList.add('m-0', 'small', 'text-black-50');
+    feedDesc.textContent = description;
+    feedItem.append(feedHeader, feedDesc);
+
+    return feedItem;
+  });
+
+  dataList.append(...feedItems);
 };
 
-const renderLoadingResponse = (currValue, elements, i18n) => {
-  const { status, error } = currValue;
+const renderLoadingResponse = (value, elements, i18n) => {
+  console.log(value);
+  const { status, error } = value;
   const {
-    feedbackEl, inputEl, formEl, submitEl,
+    feedback, input, form, submit,
   } = elements;
   switch (status) {
     case 'loading':
-      submitEl.setAttribute('disabled', 'true');
-      inputEl.setAttribute('disabled', 'true');
+      submit.setAttribute('disabled', 'true');
+      input.setAttribute('disabled', 'true');
       break;
     case 'success':
-      feedbackEl.textContent = i18n.t('loadingMessages.success');
-      feedbackEl.classList.add('text-success');
-      submitEl.removeAttribute('disabled');
-      inputEl.removeAttribute('disabled');
-      inputEl.focus();
-      formEl.reset();
+      feedback.textContent = i18n.t('loadingMessages.success');
+      feedback.classList.add('text-success');
+      submit.removeAttribute('disabled');
+      input.removeAttribute('disabled');
+      input.focus();
+      form.reset();
       break;
     case 'error':
-      feedbackEl.textContent = i18n.t(error);
-      feedbackEl.classList.add('text-danger');
-      submitEl.removeAttribute('disabled');
-      inputEl.removeAttribute('disabled');
-      inputEl.classList.add('is-invalid');
-      inputEl.focus();
+      feedback.textContent = i18n.t(error);
+      feedback.classList.add('text-danger');
+      submit.removeAttribute('disabled');
+      input.removeAttribute('disabled');
+      input.classList.add('is-invalid');
+      input.focus();
       break;
     default:
-      feedbackEl.textContent = i18n.t('loadingMessages.unknownErr');
-      feedbackEl.classList.add('text-danger');
-      submitEl.removeAttribute('disabled');
-      inputEl.classList.add('is-invalid');
-      inputEl.removeAttribute('disabled');
-      inputEl.focus();
       break;
   }
 };
 
-const renderFormResponse = (currValue, elements, i18n) => {
-  const { isValid, error } = currValue;
-  const { feedbackEl, inputEl } = elements;
+const renderFormResponse = (value, elements, i18n) => {
+  const { isValid, error } = value;
+  const { feedback, input } = elements;
   if (isValid) {
-    feedbackEl.textContent = '';
-    feedbackEl.classList.remove('text-success', 'text-danger');
-    inputEl.classList.remove('is-invalid');
+    feedback.textContent = '';
+    feedback.classList.remove('text-success', 'text-danger');
+    input.classList.remove('is-invalid');
   } else {
-    feedbackEl.textContent = i18n.t(error);
-    feedbackEl.classList.add('text-danger');
-    inputEl.classList.add('is-invalid');
-    inputEl.focus();
+    feedback.textContent = i18n.t(error);
+    feedback.classList.add('text-danger');
+    input.classList.add('is-invalid');
+    input.focus();
   }
 };
 
-export default (state, elements, i18n) => onChange(state, (path, currValue, prevValue) => {
+export default (state, elements, i18n) => onChange(state, (path, value) => {
   const {
-    formEl, feedbackEl, inputEl, submitEl,
-    feedsEl, postsEl, modal,
+    form, feedback, input, submit,
+    feeds, posts, modal,
   } = elements;
 
   switch (path) {
     case 'form':
-      renderFormResponse(currValue, { feedbackEl, inputEl, formEl }, i18n);
+      renderFormResponse(value, { feedback, input, form }, i18n);
       break;
     case 'loadingProcess':
-      renderLoadingResponse(currValue, {
-        feedbackEl, inputEl, formEl, submitEl,
+      renderLoadingResponse(value, {
+        feedback, input, form, submit,
       }, i18n);
       break;
     case 'feeds':
-      renderFeeds(currValue, prevValue, feedsEl, i18n.t(path));
+      renderFeeds(state, feeds, i18n.t(path));
       break;
     case 'posts':
-      renderPosts(currValue, prevValue, postsEl, i18n.t(path), i18n.t('button'));
+      renderPosts(state, posts, i18n.t(path), i18n.t('button'));
       break;
-    case 'uiState.readPostsId':
-      renderReadPosts(prevValue, currValue);
+    case 'uiState.seenPostIds':
+      renderPosts(state, posts, i18n.t(path), i18n.t('button'));
       break;
     case 'uiState.modal.modalId':
-      renderModal(state, currValue, modal, i18n);
+      renderModal(state, value, modal, i18n);
       break;
     default:
       console.error(`Unknown state to change - ${path}`);
