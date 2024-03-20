@@ -93,7 +93,7 @@ const app = () => {
     };
 
     const updatePosts = () => {
-      const updatedPosts = (watchedState.feeds.map(({ url, id }) => (
+      const promises = watchedState.feeds.map(({ url, id }) => (
         axios.get(addProxy(url)).then((response) => {
           const { posts } = parse(response.data.contents);
           const prevPostsLinks = watchedState.posts
@@ -104,8 +104,8 @@ const app = () => {
           const newPosts = newPostsLinks.map((post) => ({ ...post, feedId: id, id: uniqueId() }));
           watchedState.posts = [...newPosts, ...watchedState.posts];
         }).catch(console.error)
-      )));
-      Promise.all(updatedPosts).then(() => setTimeout(updatePosts, 5000));
+      ));
+      Promise.all(promises).then(() => setTimeout(updatePosts, 5000));
     };
 
     elements.form.addEventListener('submit', (e) => {
